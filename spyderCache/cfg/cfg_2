@@ -1,0 +1,8 @@
+#this is the configuration file...
+
+[local]
+node_id = 2
+node_port = 8002
+
+[network]
+#peer = localhost:8003
