@@ -7,20 +7,25 @@ import logging
 
 class LogHelper(object):
     
-    @staticmethod
-    def setupLogging(logger):
-        
-        formatter = logging.Formatter('[%(levelname)s] %(message)s')
-        
-        consoleLogger = logging.StreamHandler()
-        consoleLogger.setLevel(logging.INFO)
-        consoleLogger.setFormatter(formatter)
-        logger.addHandler(consoleLogger)
-        
-        fileLogger = logging.FileHandler(filename='errors.log')
-        fileLogger.setLevel(logging.ERROR)
-        fileLogger.setFormatter(formatter)
-        logger.addHandler(fileLogger)
+    setup_complete = False
+    logger = logging.getLogger('spyderLog')
     
-
-
+    @staticmethod
+    def getLogger():
+        if not LogHelper.setup_complete:
+            formatter = logging.Formatter('[%(levelname)s] %(message)s')
+            
+            fileLogHandler = logging.FileHandler(filename='errors.log')
+            fileLogHandler.setLevel(logging.ERROR)
+            fileLogHandler.setFormatter(formatter)
+            LogHelper.logger.addHandler(fileLogHandler)
+            
+            infoLogHandler = logging.FileHandler(filename='info.log')
+            infoLogHandler.setLevel(logging.INFO)
+            infoLogHandler.setFormatter(formatter)
+            LogHelper.logger.addHandler(infoLogHandler)
+            
+            LogHelper.logger.setLevel(logging.INFO)
+            LogHelper.setup_complete = True
+            
+        return LogHelper.logger

@@ -7,7 +7,6 @@ Created on Mar 10, 2012
 from cache import Cache
 from mhlib import isnumeric
 from random import random, Random
-from shovel import task
 from topology import Topology
 from utils import LogHelper
 import cherrypy
@@ -26,7 +25,7 @@ class Communicator(object):
     #------------------------------------------------------------------------------ 
     # Logging setup
     #------------------------------------------------------------------------------ 
-    logger = logging.getLogger('Communicator')
+    logger = LogHelper.getLogger()
     cache = Cache()
 
     def __init__(self, topology):
@@ -37,23 +36,61 @@ class Communicator(object):
         # By this time, topology has configured itself based on the config file 
         # or the defaults
         #=======================================================================
+        
         self.CURRENT_NODE_ID = topology.node_id
+        self.logger.info('setup up comm: ' + str(self.CURRENT_NODE_ID) + '\n')
+        
         self.map = dict()
         self.topology = topology
+        self.cache.topology = self.topology
+
         
-        LogHelper.setupLogging(self.logger)
         
-    def get(self, key):
+    def get(self, key, origin='client'):
+        if origin == 'client':
+            print "From Client"
+        else:
+            if str(origin) == self.topology.node_address:
+                print "Houston, we have a problem. Cycle detected. Have to fail"
+                return None
+            
         self.logger.info("Key requested: " + key)
-        return self.cache.fetch(key)
+        
+        node = self.topology.key_manager.get_node(key)
+        print node
+        
+        if node == self.topology.node_address:  #we are responsible for fetching this key from the cache
+            return self.cache.fetch(key)
+        else:                                   #tell our peer to handle this key
+            return self.topology.instructPeer(node, 'GET', cherrypy.serving.request.path_info) #TODO change faux get/post to auto route
     
-    def put(self, key, value):
-        self.topology.instruct(cherrypy.serving.request.method, cherrypy.serving.request.path_info)
-        return self.cache.store(key, value)
-    
+    def put(self, key, value, origin='client'):
+        #self.topology.instruct(cherrypy.serving.request.method, cherrypy.serving.request.path_info)
+        if origin == 'client':
+            print "From Client"
+        else:
+            if str(origin) == self.topology.node_address:
+                print "Houston, we have a problem. Cycle detected. Have to fail"
+                return None
+        
+        node = self.topology.key_manager.get_node(key)
+        print node
+        print self.topology.key_manager.gen_key(key)
+        
+        if node == self.topology.node_address:  #we are responsible for storing this key in the cache
+            return self.cache.store(key, value)
+        else:                                   #tell our peer to handle this key
+            return self.topology.instructPeer(node, 'GET', cherrypy.serving.request.path_info) #TODO change faux get/post to auto route 
         
     def delete(self, key):
-        return self.cache.erase(key)
+        
+        node = self.topology.key_manager.get_node(key)
+        print node
+        
+        if node == self.topology.node_address:  #we are responsible for deleting this key from the cache
+            return self.cache.erase(key)
+        else:                                   #tell our peer to handle this key
+            return self.topology.instructPeer(node, 'GET', cherrypy.serving.request.path_info) #TODO change faux get/post to auto route
     
     def connect(self, remote_address):
         self.topology.connect(remote_address)
@@ -67,18 +104,19 @@ class Communicator(object):
     delete.exposed = True
     connect.exposed = True
     
-@task
 def main():
     my_port = 8080 #default
     my_id = 0 #default
-    topology = Topology(my_port, my_id) 
+    my_address = '127.0.0.1'
+    
+    topology = Topology(my_address, my_port, my_id) 
 
     if len(sys.argv) > 1:
         #=======================================================================
         # Ask Topology to read the config file and 
         # configure itself appropriately
         #=======================================================================
-        my_id, my_port = topology.construct(sys.argv[1])
+        my_id, my_port = topology.configure(my_address, sys.argv[1])
         print "Running in configured mode: id=%s, port=%s" % (my_id, my_port)
     else:
         print "Running in standalone mode: id=%s, port=%s" % (my_id, my_port)
@@ -86,7 +124,7 @@ def main():
     conf = {
         'global': {
            #just saying you are to run at the localhost port..
-            'server.socket_host': '0.0.0.0',
+            'server.socket_host': my_address,
             'server.socket_port': my_port,
         }
     }

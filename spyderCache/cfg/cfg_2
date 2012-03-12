@@ -5,4 +5,4 @@ node_id = 2
 node_port = 8002
 
 [network]
-#peer = localhost:8003
+peer = 127.0.0.1:8003

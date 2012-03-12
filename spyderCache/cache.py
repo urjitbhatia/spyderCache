@@ -4,16 +4,18 @@ Created on Mar 10, 2012
 @author: urjit
 '''
 
-import logging
+from topology import Topology
 from utils import LogHelper
+import logging
 import pickle
+import httplib
 
 
 class Cache(object):
     '''
     classdocs
     '''
-    logger = logging.getLogger('Cache')
+    logger = LogHelper.getLogger()
     
     disk_persist = False
     diskCache = None
@@ -28,7 +30,7 @@ class Cache(object):
         if self.disk_persist:
             self.diskCache = DiskCache() 
             
-        LogHelper.setupLogging(self.logger)
+        
         
     def store(self, key, value):
         
@@ -40,8 +42,7 @@ class Cache(object):
             self.diskCache.persist(self.data_map)
             
         return data_value
-        
-        
+
     def fetch(self, key):
         
         return self.data_map[key] if self.data_map.has_key(key) else "--null--"
