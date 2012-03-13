@@ -1,5 +1,43 @@
 author: urjit singh bhatia
 url:	about.me/urjitbhatia
-email: urjitsb87@gmail.com
+email:  urjitsb87@gmail.com
 
 SpyderCache is a distributed cache written in python.
+
+There are 3 main parts:
+
+1. Topology Layer
+    This layer is responsible for knowing where its peers are and talking to them over a 'peer-channel'.
+    A sub-system of this layer is the KeyManager which is an implementation of consistent hashing (Thanks http://amix.dk/blog/post/19367 for the boiler-plate code).
+
+2. Communication Layer
+    This layer is responsible for gathering requests from clients and using appropriate layers in the system to accomplish the requested tasks. This layer runs cocooned in a thin web-server - currently CherryPy based on some benchmarks here: http://nichol.as/benchmark-of-python-web-servers.
+
+3. Caching Layer
+    This layer is responsible for storing the data in memory. Disk support for recovery is being added, which will allow a dead node to recover its last known state.
+
+Features available currently:
+
+1. Simple file based configuration of the system.
+    Example:
+
+    #This is the configuration file.
+
+    [local]
+    node_id = 1
+    node_port = 8001
+    
+    [network]
+    peer = 127.0.0.1:8002,
+           127.0.0.1:8003
+
+    This file will fire node 8001 and instruct it to connect to nodes 8002 and 8003 as its distribution partners.
+
+2. If a node goes down on the fly, other nodes assume responsiblity for the data. Bringing a node back to life is very easy. It starts caching its share of data as soon as it can.
+
+
+TODO:
+
+Add support for journaling to disk so that we can reinstate a node to its last known state.
+Add cache invalidation message from peer nodes.
+Add heartbeat monitoring and thin master to maintain the system.
