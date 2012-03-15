@@ -4,11 +4,8 @@ Created on Mar 10, 2012
 @author: urjit
 '''
 
-from topology import Topology
+from diskCache import DiskCache
 from utils import LogHelper
-import logging
-import pickle
-import httplib
 
 
 class Cache(object):
@@ -18,7 +15,7 @@ class Cache(object):
     logger = LogHelper.getLogger()
     
     disk_persist = False
-    diskCache = None
+    diskCache = DiskCache()
     
     def __init__(self, disk_persist=False):
         '''
@@ -26,13 +23,11 @@ class Cache(object):
         '''
         self.data_map = dict()
         self.disk_persist = disk_persist
-        
-        if self.disk_persist:
-            self.diskCache = DiskCache() 
-            
-        
+        self.data_map = self.diskCache.reconstruct()
         
     def store(self, key, value):
+        
+        self.diskCache.journal('put', key, value)
         
         data_value = self.data_map[key] if self.data_map.has_key(key) else "--saved--"        
         
@@ -49,13 +44,6 @@ class Cache(object):
     
     def erase(self, key):
         
+        self.diskCache.journal('delete', key)
+        
         return self.data_map.pop(key, "--null--")  
-
-class DiskCache(object):
-    '''
-    classdocs
-    '''
-    
-    def persist(self, data_to_persist):
-        #store the cache to the disk
-        print pickle.dumps(data_to_persist)

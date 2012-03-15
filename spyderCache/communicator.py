@@ -82,7 +82,14 @@ class Communicator(object):
         else:                                   #tell our peer to handle this key
             return self.topology.instructPeer(node, 'GET', cherrypy.serving.request.path_info) #TODO change faux get/post to auto route 
         
-    def delete(self, key):
+    def delete(self, key, origin='client'):
+        
+        if origin == 'client':
+            print "From Client"
+        else:
+            if str(origin) == self.topology.node_address:
+                print "Houston, we have a problem. Cycle detected. Have to fail"
+                return None
         
         node = self.topology.key_manager.get_node(key)
         print node
@@ -94,7 +101,9 @@ class Communicator(object):
     
     def connect(self, remote_address):
         self.topology.connect(remote_address)
-    
+        
+    def reconstruct(self):
+        self.cache.diskCache.reconstruct()
     
     #===============================================================================
     # Need to tell the CherryPy engine which methods we need to expose
@@ -103,6 +112,7 @@ class Communicator(object):
     put.exposed = True
     delete.exposed = True
     connect.exposed = True
+    reconstruct.exposed = True
     
 def main():
     my_port = 8080 #default
