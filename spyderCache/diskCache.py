@@ -8,6 +8,7 @@ import io
 import marshal
 import msgpack
 import pickle
+import sys
 
 
 class DiskCache(object):
@@ -29,18 +30,16 @@ class DiskCache(object):
         self.mode = mode
 
         #=======================================================================
-        #self.journal_file = open(self.journal_path, 'a', 0) - last arg is 0 since we want to flush immediately 
+        # self.journal_file = open(self.journal_path, 'a', 0) - 
+        # last arg is 0 since we want to flush immediately
+        # Immediate flush mode is 'slow' 
         #=======================================================================
-        self.journal_file = open(self.journal_path, 'a', 0)
+        self.journal_file = open(self.journal_path, 'a')
         self.packer = msgpack.Packer()
         
     def journal(self, command, key, value=None):
         #store the cache to the disk
-        if value:
-            self.journal_file.write(self.packer.pack([command, key, value]))
-            
-        else:
-            self.journal_file.write(self.packer.pack([command, key, None]))
+        self.journal_file.write(self.packer.pack([command, key, value]))
     
     def reconstruct(self, recovery_journal='./events_journal'):
         print "Reconstructing from journal: %s" % recovery_journal

@@ -26,7 +26,7 @@ class Communicator(object):
     # Logging setup
     #------------------------------------------------------------------------------ 
     logger = LogHelper.getLogger()
-    cache = Cache()
+    
 
     def __init__(self, topology):
         '''
@@ -42,65 +42,66 @@ class Communicator(object):
         
         self.map = dict()
         self.topology = topology
+        self.cache = Cache(reconstruct=self.topology.local_reconstruct)
         self.cache.topology = self.topology
-
         
         
-    def get(self, key, origin='client'):
+    def GET(self, key, origin='client'):
+        
         if origin == 'client':
-            print "From Client"
+            self.logger.info("Request from client")
         else:
             if str(origin) == self.topology.node_address:
-                print "Houston, we have a problem. Cycle detected. Have to fail"
+                self.logger.error("Houston, we have a problem. Cycle detected. Have to fail...")
                 return None
-            
-        self.logger.info("Key requested: " + key)
-        
         node = self.topology.key_manager.get_node(key)
-        print node
+        
+        self.logger.info("Key requested: " + key)
+        self.logger.info("Node responsible: " + node)
         
         if node == self.topology.node_address:  #we are responsible for fetching this key from the cache
             return self.cache.fetch(key)
         else:                                   #tell our peer to handle this key
             return self.topology.instructPeer(node, 'GET', cherrypy.serving.request.path_info) #TODO change faux get/post to auto route
     
-    def put(self, key, value, origin='client'):
-        #self.topology.instruct(cherrypy.serving.request.method, cherrypy.serving.request.path_info)
+    
+    def PUT(self, key, value, origin='client'):
+        
         if origin == 'client':
-            print "From Client"
+            self.logger.info("Request from client")
         else:
             if str(origin) == self.topology.node_address:
-                print "Houston, we have a problem. Cycle detected. Have to fail"
+                self.logger.error("Houston, we have a problem. Cycle detected. Have to fail...")
                 return None
         
         node = self.topology.key_manager.get_node(key)
-        print node
-        print self.topology.key_manager.gen_key(key)
         
         if node == self.topology.node_address:  #we are responsible for storing this key in the cache
             return self.cache.store(key, value)
         else:                                   #tell our peer to handle this key
-            return self.topology.instructPeer(node, 'GET', cherrypy.serving.request.path_info) #TODO change faux get/post to auto route 
+            return self.topology.instructPeer(node, 'PUT', cherrypy.serving.request.path_info) #TODO change faux get/post to auto route 
+    
         
-    def delete(self, key, origin='client'):
+    def DELETE(self, key, origin='client'):
         
         if origin == 'client':
-            print "From Client"
+            self.logger.info("Request from Client")
         else:
             if str(origin) == self.topology.node_address:
-                print "Houston, we have a problem. Cycle detected. Have to fail"
+                self.logger.error("Houston, we have a problem. Cycle detected. Have to fail...")
                 return None
         
         node = self.topology.key_manager.get_node(key)
-        print node
         
         if node == self.topology.node_address:  #we are responsible for deleting this key from the cache
             return self.cache.erase(key)
         else:                                   #tell our peer to handle this key
-            return self.topology.instructPeer(node, 'GET', cherrypy.serving.request.path_info) #TODO change faux get/post to auto route
+            return self.topology.instructPeer(node, 'DELETE', cherrypy.serving.request.path_info) #TODO change faux get/post to auto route
+    
     
     def connect(self, remote_address):
         self.topology.connect(remote_address)
+    
         
     def reconstruct(self):
         self.cache.diskCache.reconstruct()
@@ -108,11 +109,12 @@ class Communicator(object):
     #===============================================================================
     # Need to tell the CherryPy engine which methods we need to expose
     #===============================================================================
-    get.exposed = True
-    put.exposed = True
-    delete.exposed = True
-    connect.exposed = True
-    reconstruct.exposed = True
+    #    get.exposed = True
+    #    put.exposed = True
+    #    delete.exposed = True
+    #    connect.exposed = True
+    #    reconstruct.exposed = True
+    exposed = True
     
 def main():
     my_port = 8080 #default
@@ -136,10 +138,12 @@ def main():
            #just saying you are to run at the localhost port..
             'server.socket_host': my_address,
             'server.socket_port': my_port,
-        }
+        },
+        '/': {'request.dispatch': cherrypy.dispatch.MethodDispatcher()}
     }
     
     cherrypy.quickstart(Communicator(topology), '/', conf)
+    cherrypy.log.screen=False
     
 if __name__ == "__main__":
     main()

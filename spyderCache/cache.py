@@ -17,13 +17,15 @@ class Cache(object):
     disk_persist = False
     diskCache = DiskCache()
     
-    def __init__(self, disk_persist=False):
+    def __init__(self, reconstruct, disk_persist=False):
         '''
         Constructor
         '''
         self.data_map = dict()
         self.disk_persist = disk_persist
-        self.data_map = self.diskCache.reconstruct()
+        
+        if reconstruct:
+            self.data_map = self.diskCache.reconstruct()
         
     def store(self, key, value):
         
@@ -44,6 +46,10 @@ class Cache(object):
     
     def erase(self, key):
         
-        self.diskCache.journal('delete', key)
-        
-        return self.data_map.pop(key, "--null--")  
+        if self.data_map.has_key(key):
+            #===================================================================
+            # No need to journal deletes for keys that you dont have
+            #===================================================================
+            self.diskCache.journal('delete', key)
+            return self.data_map.get(key)
+        return "--null--"

@@ -4,8 +4,8 @@ Created on Mar 10, 2012
 @author: urjit
 '''
 
-from sets import Set
 from keyManager import KeyManager
+from sets import Set
 from utils import LogHelper
 import ConfigParser
 import cherrypy
@@ -31,7 +31,7 @@ class Topology(object):
     
     #regex to match the node address pattern: ipAddress:port (IPv4 for now)
     remote_pattern = re.compile(r'^([0-9]{1,3}\.){3}[0-9]{1,3}\:[0-9]{4,5}$')
-    
+    local_reconstruct = False
 
     def __init__(self, node_address, node_port, node_id):
         '''
@@ -74,6 +74,9 @@ class Topology(object):
             self.node_address = str(node_address) + ':' + str(self.node_port)
             # TODO: check the port from cfg file isnumeric...
             
+            if config.has_option('local', 'reconstruct') and str(config.get('local', 'reconstruct')).lower() == "true":
+                self.local_reconstruct = True
+            
             #===================================================================
             # Setup the network topology from the config file
             #===================================================================
@@ -96,17 +99,19 @@ class Topology(object):
         
     def instructPeer(self, peer, command, path):
         
-        print "I ", self.node_id, ", am commanding: ", peer, " to ", command, path
+        self.logger.info(str(self.node_id) + " commanding: " + str(peer) + " to " + command + path)
         value = None
         try:
+            url = str(path) + "/" + str(self.node_address) + ":"
             conn = httplib.HTTPConnection(peer)
-            conn.request(command, path + "/" + str(self.node_address) + ":")
+            conn.request(method=command, url=url, body='', headers={'Content-length':0})
             response = conn.getresponse()
             value = response.read()
-            print dir(response)
+            self.logger.info("Response: " + response)
             conn.close()
-        except Exception as e:
+        except Exception, e:
             #TODO: inform other nodes?
-            print "Peer node seems down", e
+            self.logger.error("Peer node seems down: ")
+            self.logger.error(e)
             
         return value
