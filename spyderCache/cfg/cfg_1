@@ -4,6 +4,7 @@
 node_id = 1
 node_port = 8001
 reconstruct = False
+cache_size = 1000
 
 [network]
 peer = 127.0.0.1:8002,

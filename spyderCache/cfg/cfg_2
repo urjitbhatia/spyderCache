@@ -3,6 +3,7 @@
 [local]
 node_id = 2
 node_port = 8002
+cache_size = 1024
 
 [network]
 peer = 127.0.0.1:8003,

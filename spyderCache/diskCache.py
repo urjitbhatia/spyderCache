@@ -4,16 +4,17 @@ Created on Mar 15, 2012
 @author: urjit
 '''
 
+from lruDict import LRUDict
 import io
-import marshal
 import msgpack
-import pickle
-import sys
 
 
 class DiskCache(object):
     '''
-    classdocs
+    This class provides a journaling mechanism for logging events that
+    are pushed onto this node.
+    We can use the events log file to reconstruct the cache when a node
+    goes down and then is restored/moved to another machine.
     '''
     #===========================================================================
     # Possible modes: 
@@ -37,13 +38,20 @@ class DiskCache(object):
         self.journal_file = open(self.journal_path, 'a')
         self.packer = msgpack.Packer()
         
+        
+    '''
+    This method adds an entry into the events_journal
+    '''
     def journal(self, command, key, value=None):
         #store the cache to the disk
         self.journal_file.write(self.packer.pack([command, key, value]))
     
+    '''
+    This method takes an event journal and reconstructs the cache
+    '''
     def reconstruct(self, recovery_journal='./events_journal'):
         print "Reconstructing from journal: %s" % recovery_journal
-        cache = dict()
+        cache = LRUDict()
         
         unpacker = msgpack.Unpacker()
         recovery_file = io.open(recovery_journal, 'rb', buffering=1024)
