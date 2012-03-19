@@ -38,6 +38,6 @@ Features available currently:
 
 TODO:
 
-Add support for journaling to disk so that we can reinstate a node to its last known state.
+[DONE] Add support for journaling to disk so that we can reinstate a node to its last known state.
 Add cache invalidation message from peer nodes.
-Add heartbeat monitoring and thin master to maintain the system.
+[DONE] Add heartbeat monitoring and thin master to maintain the system.
