@@ -18,6 +18,15 @@ There are 3 main parts:
     Support for recovery from disk is available, 
     which will allow a dead node to recover its last known state.
 
+Installing dependencies:
+	
+	Python Version:
+	This was built using python 2.7.2. on Ubuntu 11.10 [GCC 4.6.1]
+
+	Use a package manager like pip and install the following packages:
+	1. python-msgpack
+	2. cherrypy
+
 Features available currently:
 
 1. Simple file based configuration of the system. Explanation of a complete config file follows.
@@ -51,6 +60,7 @@ Add cache invalidation message from peer nodes.
 
 
 3. Command scripts:
+	
 	See utils directory for some standalone command scripts.
 	Example:
 	use put.py to put a key value pair onto a node
