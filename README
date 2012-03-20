@@ -35,15 +35,26 @@ Features available currently:
     #This is the configuration file.
 
     [local]
-    node_id = 1					#this is the id of the node which this file will drive. Any string is valid
-    node_port = 8001			#the port at which this node should communicate. valid entry regex \:[0-9]{4,5}$
-    reconstruct = False			#should the node read the events journal to restore last known state? valid: True/False
-	cache_size = 1000			#Maximum number of keys this cache is allowed to hold. After this limit is hit,
-								#the cache will start evicting keys using an LRU mechanism
+    node_id = 1					
+	#this is the id of the node which this file will drive. Any string is valid
     
-    [network]					#simply the list of peers this node should connect to.
-    peer = 127.0.0.1:8002,		#it is a comma separated list of the form <ipv4address>:<port>
-           127.0.0.1:8003		#valid entry regex is: ^([0-9]{1,3}\.){3}[0-9]{1,3}\:[0-9]{4,5}$
+    node_port = 8001			
+	#the port at which this node should communicate. valid entry regex \:[0-9]{4,5}$
+    
+	reconstruct = False			
+	#should the node read the events journal to restore last known state? valid: True/False
+	
+	cache_size = 1000			
+	#Maximum number of keys this cache is allowed to hold. After this limit is hit,
+	#the cache will start evicting keys using an LRU mechanism
+    
+    [network]					
+	#simply the list of peers this node should connect to.
+    
+	peer = 127.0.0.1:8002,		
+			#it is a comma separated list of the form <ipv4address>:<port>
+           127.0.0.1:8003		
+			#valid entry regex is: ^([0-9]{1,3}\.){3}[0-9]{1,3}\:[0-9]{4,5}$
 
     This file will fire node 8001 and instruct it to connect to nodes 8002 and 8003 as its distribution partners.
 	
