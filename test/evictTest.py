@@ -3,7 +3,7 @@ Created on Mar 16, 2012
 
 @author: urjit
 
-Perform GETs,PUTs and DELETEs at random
+Perform a series of gets and puts on the node
 '''
 
 import httplib

@@ -18,6 +18,7 @@ class Config():
     replicas = 3
     peers = []
     local_reconstruct = False
+    mirrors = []
 
     def __init__(self, node_id, node_address, node_port):
         self.node_id = node_id
@@ -53,8 +54,11 @@ class Config():
             # Setup the network topology from the config file
             #===================================================================
 
-            if config.has_section('network') and config.has_option('network', 'peer'):
-                self.peers = config.get('network', 'peer').replace('\n', '').split(',')
+            if config.has_section('network') and config.has_option('network', 'peers'):
+                self.peers = config.get('network', 'peers').replace('\n', '').split(',')
+            
+            if config.has_section('network') and config.has_option('network', 'mirrors'):
+                self.mirrors = config.get('network', 'mirrors').replace('\n', '').split(',')
 
         except Exception as e:
             print "Problem processing the configuration file"

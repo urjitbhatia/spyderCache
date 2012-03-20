@@ -11,7 +11,8 @@ from utils import LogHelper
 
 class Cache(object):
     '''
-    classdocs
+    This is a wrapper class around the LRU cache. It provides simplified interface
+    to store and retreive values from the underlying LRU cache.
     '''
     logger = LogHelper.getLogger()
 
@@ -63,5 +64,6 @@ class Cache(object):
             # No need to journal deletes for keys that you dont have
             #===================================================================
             self.diskCache.journal('delete', key)
+            self.data_map.__delitem__(key)
             return self.data_map.get(key)
         return "--null--"

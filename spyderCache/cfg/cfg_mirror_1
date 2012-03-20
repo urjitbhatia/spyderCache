@@ -2,12 +2,8 @@
 
 [local]
 node_id = 1
-node_port = 8001
+node_port = 8004
 reconstruct = False
 cache_size = 1000
 
 [network]
-peers = 127.0.0.1:8002,
-       127.0.0.1:8003
-
-mirrors = 127.0.0.1:8004

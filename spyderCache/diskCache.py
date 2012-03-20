@@ -7,6 +7,7 @@ Created on Mar 15, 2012
 from lruDict import LRUDict
 import io
 import msgpack
+from aifc import Error
 
 
 class DiskCache(object):
@@ -33,9 +34,9 @@ class DiskCache(object):
         #=======================================================================
         # self.journal_file = open(self.journal_path, 'a', 0) - 
         # last arg is 0 since we want to flush immediately
-        # Immediate flush mode is 'slow' 
+        # Immediate flush mode is 'slow' but needed to guarantee data is preserved
         #=======================================================================
-        self.journal_file = open(self.journal_path, 'a')
+        self.journal_file = open(self.journal_path, 'a', 0)
         self.packer = msgpack.Packer()
         
         
@@ -55,15 +56,21 @@ class DiskCache(object):
         
         unpacker = msgpack.Unpacker()
         recovery_file = io.open(recovery_journal, 'rb', buffering=1024)
-        
+
         unpacker.feed(recovery_file.read())
+        try:
+            for command, key, value in unpacker:
+                try:
+                    if command == 'put':
+                        cache[key] = value
+                    else:
+                        cache.pop(key)
+                except KeyError:
+                    pass
+        except Error, e:
+            print e
         
-        for command, key, value in unpacker:
-            if command == 'put':
-                cache[key] = value
-            else:
-                cache.pop(key)
-                
+        recovery_file.seek(0)             
         #return the cache we built from the journal
         return cache
             

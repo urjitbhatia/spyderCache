@@ -2,8 +2,12 @@
 Created on Mar 11, 2012
 
 @author: urjit
+
+Code adapted from :
+http://amix.dk/blog/post/19367
+
 '''
-import logging
+
 import md5
 from utils import LogHelper
 
@@ -11,15 +15,15 @@ class KeyManager(object):
     '''
     This class manages the operations related to key distribution.
     It uses a simple consistent hashing approach for distributing data evenly amongst the available nodes.
-    '''        
-    
+    '''
+
     #default to using 3 replicas of each node - to improve distribution
     replicas = 3
     ring = dict()
     _sorted_keys = []
-    
+
     logger = LogHelper.getLogger()
-    
+
     def setupHashRing(self, connections, replicas=3):
         """Manages a hash ring.
 
@@ -35,7 +39,7 @@ class KeyManager(object):
         if len(connections) > 0:
             for node in connections:
                 self.add_node(node)
-        
+
         self.logger.info(self._sorted_keys)
 
     def add_node(self, node):
@@ -45,7 +49,7 @@ class KeyManager(object):
             key = self.gen_key('%s:%s' % (node, i)) #append the virtual copy number to mix the key
             self.ring[key] = node                   #append the virtual copy to the key ring
             self._sorted_keys.append(key)           #maintain a sorted list of keys
-            self.logger.info("node: " + str(node) + " key: " + str(key)) 
+            self.logger.info("node: " + str(node) + " key: " + str(key))
 
         self._sorted_keys.sort()
         self.logger.info("node added " + str(node))
@@ -55,8 +59,11 @@ class KeyManager(object):
         """
         for i in xrange(0, self.replicas):
             key = self.gen_key('%s:%s' % (node, i)) #remove the virtual copy for this node, same 'key' is generated as when adding the nodes
-            del self.ring[key]                      #delete the node at the 'key' index                  
-            self._sorted_keys.remove(key)           #delete the key from the list of sorted keys
+            try:
+                del self.ring[key]                      #delete the node at the 'key' index                  
+                self._sorted_keys.remove(key)           #delete the key from the list of sorted keys
+            except:
+                pass
 
     def get_node(self, string_key):
         """Given a string key a corresponding node in the hash ring is returned.
@@ -77,8 +84,8 @@ class KeyManager(object):
         key = self.gen_key(string_key)              #generate the key
 
         nodes = self._sorted_keys                   #available nodes
-        for i in xrange(0, len(nodes)):             
-            node = nodes[i]                         
+        for i in xrange(0, len(nodes)):
+            node = nodes[i]
             if key <= node:                         #first 'node key' that is gt or eq to the 'data key'
                 return self.ring[node], i
 

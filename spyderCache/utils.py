@@ -15,15 +15,17 @@ class LogHelper(object):
         if not LogHelper.setup_complete:
             formatter = logging.Formatter('[%(levelname)s] %(message)s')
             
-            fileLogHandler = logging.FileHandler(filename='errors.log')
+            fileLogHandler = logging.FileHandler(filename='./errors.log', delay=0, mode='a')
             fileLogHandler.setLevel(logging.ERROR)
             fileLogHandler.setFormatter(formatter)
             LogHelper.logger.addHandler(fileLogHandler)
+            print "Logging errors to: ", fileLogHandler.baseFilename
             
-            infoLogHandler = logging.FileHandler(filename='info.log')
+            infoLogHandler = logging.FileHandler(filename='./info.log',delay=0, mode='a')
             infoLogHandler.setLevel(logging.INFO)
             infoLogHandler.setFormatter(formatter)
             LogHelper.logger.addHandler(infoLogHandler)
+            print "Logging info to: ", infoLogHandler.baseFilename
             
             LogHelper.logger.setLevel(logging.INFO)
             LogHelper.setup_complete = True

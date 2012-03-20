@@ -3,8 +3,7 @@ Created on Mar 16, 2012
 
 @author: urjit
 
-heartBeatMonitor for monitoring the nodes.
-Add address in the supplied file as the first argument
+Perform GETs,PUTs and DELETEs at random
 '''
 
 import httplib

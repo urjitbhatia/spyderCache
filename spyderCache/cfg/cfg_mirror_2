@@ -1,0 +1,9 @@
+#This is the configuration file.
+
+[local]
+node_id = 2
+node_port = 8005
+reconstruct = False
+cache_size = 1000
+
+[network]

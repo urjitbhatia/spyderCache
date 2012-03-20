@@ -27,4 +27,13 @@ DiskCache
 		0.0023589134216308594	0.022350788116455078	0.0014629364013671875
 		
 		Seems like msgPack wins for now. It has quite a good community and multi-language support. Seems promising.
+
+2. We have a hard limit on the number of keys that a node can store. This is probably not 
+	ideal. We want to have a spill over system such that we can use the disk to extend
+	the cache.
 	
+	Cassandra uses Bloom Filters for this:
+		http://en.wikipedia.org/wiki/Bloom_filter
+		
+		We can add this into the diskCache such that we have data files and
+		indices managed by the Bloom Filter. 
