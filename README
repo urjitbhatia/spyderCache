@@ -1,9 +1,13 @@
-author: urjit singh bhatia*
-url:	about.me/urjitbhatia*
+SpyderCache
+=============
+
+author: urjit singh bhatia
+url:	about.me/urjitbhatia
 email:  urjitsb87@gmail.com
 
 ##SpyderCache - a distributed cache written in python.##
 ----
+
 
 ###There are 3 main parts:###
 
