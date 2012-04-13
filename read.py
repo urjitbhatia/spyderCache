@@ -1,3 +1,12 @@
+'''
+This script is a small utility to read the events journal, named as events_journal by default.
+The journal stores all the put and delete events so that a node can be reconstructed from the logs
+if it goes down.
+
+We use msgpack for reading and writing data into the journal.
+'''
+
+
 import msgpack
 import io
 import sys
