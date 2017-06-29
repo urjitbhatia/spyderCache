@@ -22,9 +22,9 @@ DiskCache
 		
 		Data from some test runs...
 		
-		cPickle					pickle					msgPack
-		0.0015628337860107422	0.01938796043395996		0.001889944076538086
-		0.0023589134216308594	0.022350788116455078	0.0014629364013671875
+		cPickle					pickle				msgPack
+		0.0015628337860107422	                0.01938796043395996		0.001889944076538086
+		0.0023589134216308594	                0.022350788116455078	        0.0014629364013671875
 		
 		Seems like msgPack wins for now. It has quite a good community and multi-language support. Seems promising.
 
